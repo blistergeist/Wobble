@@ -57,7 +57,7 @@ def calculate_positions(bodies):
     Never returns; loops through the simulation, updating the
     positions of all the provided bodies.
     """
-    timestep = 3600  # One day in seconds
+    timestep = 3600  # One hour in seconds
     num_steps = int(10e3)
     print('Calculating orbital paths over a period of {} tellurian days...'.format(num_steps))
 
