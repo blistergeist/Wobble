@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#units of velocity are in m/s
+#units of distance are in m
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -58,8 +60,8 @@ def calculate_positions(bodies):
     positions of all the provided bodies.
     """
     timestep = 3600  # One hour in seconds
-    num_steps = int(10e3)
-    print('Calculating orbital paths over a period of {} tellurian days...'.format(num_steps))
+    num_steps = int(1.1e3)
+    print('Calculating orbital paths over a period of {} tellurian hours...'.format(num_steps))
 
     for step in xrange(num_steps): #columns
         #update graph every 1000 days
@@ -92,7 +94,7 @@ def calculate_positions(bodies):
 def main():
     sun = heavenly_body(name='Sun', mass=1.98892e30)
     mercury = heavenly_body(name='Mercury', mass=0.3301e24, pos=(-.387*AU,0), vel=(0,47.36e3), color='black')
-    venus = heavenly_body(name='Venus', mass=4.8685e24, pos=(-.723*AU,0), vel=(0,35.02e3), color='orange')
+    venus = heavenly_body(name='Venus', mass=4.8685e24, pos=(-.723*AU,0), vel=(0,-35.02e3), color='orange')
     earth = heavenly_body(name='Earth', mass=5.9742e24, pos=(-1*AU,0), vel=(0,29.783e3), color='blue')
     moon = heavenly_body(name='Moon', mass=7.3478e22, pos=(-1.00257*AU,0), vel=(0,(1.0224e3+29.783e3)), color='gray')
     mars = heavenly_body(name='Mars', mass=.64171e24, pos=(-1.524*AU,0), vel=(0,24.07e3), color='red')
