@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from scipy.inegrate import ode
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -70,7 +70,7 @@ def calculate_positions(bodies):
     Never returns; loops through the simulation, updating the
     positions of all the provided bodies.
     """
-    timestep = 24*3600  # One day in seconds
+    timestep = 60  # One day in seconds
     num_steps = int(1e5)
     print('Calculating orbital paths over a period of {} tellurian days...'.format(num_steps))
 
@@ -82,7 +82,8 @@ def calculate_positions(bodies):
                 body.pxvector = [body.px]
                 body.pyvector = [body.py]
         #update_info(step, bodies)
-        force = {}
+
+def dopri_function(timestep, bodies):
         for body in bodies:   #rows
             # Add up all of the forces exerted on 'body'.
             total_fx = total_fy = 0.0
@@ -98,15 +99,19 @@ def calculate_positions(bodies):
             body.vy += total_fy/body.mass*timestep
             body.px += body.vx*timestep
             body.py += body.vy*timestep
-            body.pxvector.append(body.px)
-            body.pyvector.append(body.py)
-    plt.show()
+            
+
+"""body.pxvector.append(body.px)
+body.pyvector.append(body.py)
+plt.show()"""
+
 
 def main():
     sun = heavenly_body(name='Sun', mass=1.98892e30)
     mercury = heavenly_body(name='Mercury', mass=0.3301e24, pos=(-.387*AU,0), vel=(0,47.36e3), color='black')
     venus = heavenly_body(name='Venus', mass=4.8685e24, pos=(-.723*AU,0), vel=(0,35.02e3), color='orange')
     earth = heavenly_body(name='Earth', mass=5.9742e24, pos=(-1*AU,0), vel=(0,29.783e3), color='blue')
+    themoon = heavenly_body(name='The Moon', mass=7.34767309e22, pos=(-1*AU-0.00257*AU,0), vel=(0,29.783e3+1.022e3), color='grey')
     mars = heavenly_body(name='Mars', mass=.64171e24, pos=(-1.524*AU,0), vel=(0,24.07e3), color='red')
     jupiter = heavenly_body(name='Jupiter', mass=1898.19e24, pos=(-5.204*AU,0), vel=(0,13.06e3), color='magenta')
     saturn = heavenly_body(name='Saturn', mass=568.34e24, pos=(-9.582*AU,0), vel=(0,9.6e3), color='green')
@@ -114,7 +119,7 @@ def main():
     neptune = heavenly_body(name='Neptune', mass=102.413e24, pos=(-30.047*AU,0), vel=(0,5.43e3), color='aquamarine')
     pluto = heavenly_body(name='Pluto', mass=0.01303e24, pos=(-39.482*AU,0), vel=(0,4.74e3), color='purple')
 
-    bodies = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune, pluto]
+    bodies = [sun, mercury, venus, earth, themoon] #, mars, jupiter, saturn, uranus, neptune, pluto]
     calculate_positions(bodies)
     """
     plt.plot(sun.pxvector, sun.pyvector, 'black')
