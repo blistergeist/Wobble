@@ -74,32 +74,15 @@ def calculate_positions(bodies):
     num_steps = int(1e5)
     print('Calculating orbital paths over a period of {} tellurian days...'.format(num_steps))
 
-    for step in xrange(num_steps): #columns
-        #update graph every 1000 days
-        if (step>0) and (step%1000 == 0):
-            for body in bodies:
-                plt.plot(body.pxvector,body.pyvector, body.color)
-                body.pxvector = [body.px]
-                body.pyvector = [body.py]
-        #update_info(step, bodies)
+   
 
-def dopri_function(timestep, bodies):
-        for body in bodies:   #rows
-            # Add up all of the forces exerted on 'body'.
-            total_fx = total_fy = 0.0
-            for other in bodies:
-                # Don't calculate the body's attraction to itself
-                if body is other:
-                    continue
-                fx, fy = body.attraction(other)
-                total_fx += fx
-                total_fy += fy
-
-            body.vx += total_fx/body.mass*timestep
-            body.vy += total_fy/body.mass*timestep
-            body.px += body.vx*timestep
-            body.py += body.vy*timestep
+def dopri_function(timestep, bodyInfo):
+            vx += total_fx/mass*timestep
+            vy += total_fy/mass*timestep
+            px += vx*timestep
+            py += vy*timestep
             
+            return px, py
 
 """body.pxvector.append(body.px)
 body.pyvector.append(body.py)
@@ -120,7 +103,25 @@ def main():
     pluto = heavenly_body(name='Pluto', mass=0.01303e24, pos=(-39.482*AU,0), vel=(0,4.74e3), color='purple')
 
     bodies = [sun, mercury, venus, earth, themoon] #, mars, jupiter, saturn, uranus, neptune, pluto]
-    calculate_positions(bodies)
+    bodyInfo = [body.vx, body.vy, body.px, body.py, body.mass]
+    integrate_dat_bitch = ode(dopri_function).set_integrator('dopri5', method='adams')
+    integrate_dat_bitch.set_f_params(bodyInfo)
+    integrate_dat_bitch.set_initial_value()
+    #calculate_positions(bodies)
+    for step in xrange(num_steps): #columns
+        #update graph every 1000 days
+        for body in bodies:
+            # Add up all of the forces exerted on 'body'.
+            total_fx = total_fy = 0.0
+            for other in bodies:
+                # Don't calculate the body's attraction to itself
+                if body is other:
+                    continue
+                fx, fy = body.attraction(other)
+                total_fx += fx
+                total_fy += fy
+
+
     """
     plt.plot(sun.pxvector, sun.pyvector, 'black')
     plt.plot(mercury.pxvector, mercury.pyvector, 'orange')
