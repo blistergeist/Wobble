@@ -1,4 +1,17 @@
-#Morgan Note Finder
+"""
+Note Finder: 
+Determines the frequency, number of half-steps
+from A4, octaves from A4, and note name of 
+highest amplitude tone in a given vector
+Author: Morgan Allison 
+Date Created: 3/16
+Date edited: 4/16
+Windows 8 64-bit
+Python 2.7.11 64-bit (Miniconda 4.0.5)
+NumPy 1.10.4, MatPlotLib 1.4.3
+To get Anaconda/Miniconda: http://continuum.io/downloads
+Miniconda includes NumPy and MatPlotLib
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,14 +20,22 @@ import pyaudio
 import wave
 
 def note_finder(f):
+	#equation derived from http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
+	#original form: fn = f0*a^n
+	#form used: n = loga(fn/f0)
 	a = 2.0**(1.0/12.0)
 	A4 = 440.0
 	arg = abs(f)/A4
 	step = round(math.log(arg,a))
+
+	#determine how many octaves away from A4
 	octave = round(step/12)
+	#determine how many steps within the octave from A4
 	relativeStep = np.mod(step, 12)
+	#index the list of note names
 	note = notes[int(relativeStep)]
 	return step, note, octave
+
 
 def example_notes(t):
 	freq1 = 23.12
@@ -36,16 +57,18 @@ yf = abs(np.fft.fft(y))/recordLength
 f = np.fft.fftfreq(yf.size, d=1/samplerate)
 np.fft.fftshift(f)
 
-max_freq = np.argmax(yf)
 max_amp = np.amax(yf)
-step, note, octave = note_finder(f[max_freq])
+max_freq_index = np.argmax(yf)
+max_freq = f[max_freq_index]
+step, note, octave = note_finder(max_freq)
+
 print('Strongest signal level: {}'.format(max_amp))
-print('Frequency of strongest signal: {}'.format(f[max_freq]))
+print('Frequency of strongest signal: {}'.format(max_freq))
 print('Half steps from A4: {}'.format(step))
 print('Note name: {}\nOctaves from A4: {}'.format(note, octave))
 
 """
-!!!ignore this!!!
+!!!ignore this for now!!!
 
 filename = 'E:\\testsignal_1.wav'
 write_file = open(filename, 'w')
