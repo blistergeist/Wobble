@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from scipy.inegrate import ode
+from scipy.integrate import ode
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -9,10 +9,10 @@ G = 6.67428e-11
 #No need to worry about scale
 AU = (149.6e6 * 1000)     # 149.6 million km, in meters.
 
-class heavenly_body:
+class HeavenlyBody:
     #pos and vel should both be tuples, e.g. (0, 3)
     #in case you want to add other initial conditions
-    def __init__(self, name='yar', mass=0, pos=(0,0), vel=(0,0), color='k'):
+    def __init__(self, name='yar', mass=0, pos=[0,0], vel=[0,0], color='k'):
         self.name = name
         self.mass = mass
         self.px, self.py = pos
@@ -64,55 +64,49 @@ def draw_orbits():
     plt.plot(pluto.pxvector, pluto.pyvector, 'purple')
     plt.show()
 
-def calculate_positions(bodies):
-    """([Body])
+def dopri_function(absTime, integrationParams):
+            integrationParams[0] += integrationParams[5]/integrationParams[4]*absTime
+            integrationParams[1] += integrationParams[6]/integrationParams[4]*absTime
+            integrationParams[2] += integrationParams[0]*absTime
+            integrationParams[3] += integrationParams[1]*absTime
+            
+            return np.array([integrationParams[2], integrationParams[3]])
 
-    Never returns; loops through the simulation, updating the
-    positions of all the provided bodies.
-    """
+def main():
+    sun = HeavenlyBody(name='Sun', mass=1.98892e30)
+    mercury = HeavenlyBody(name='Mercury', mass=0.3301e24, pos=(-.387*AU,0), vel=(0,47.36e3), color='black')
+    venus = HeavenlyBody(name='Venus', mass=4.8685e24, pos=(-.723*AU,0), vel=(0,35.02e3), color='orange')
+    earth = HeavenlyBody(name='Earth', mass=5.9742e24, pos=(-1*AU,0), vel=(0,29.783e3), color='blue')
+    themoon = HeavenlyBody(name='The Moon', mass=7.34767309e22, pos=(-1*AU-0.00257*AU,0), vel=(0,29.783e3+1.022e3), color='grey')
+    mars = HeavenlyBody(name='Mars', mass=.64171e24, pos=(-1.524*AU,0), vel=(0,24.07e3), color='red')
+    jupiter = HeavenlyBody(name='Jupiter', mass=1898.19e24, pos=(-5.204*AU,0), vel=(0,13.06e3), color='magenta')
+    saturn = HeavenlyBody(name='Saturn', mass=568.34e24, pos=(-9.582*AU,0), vel=(0,9.6e3), color='green')
+    uranus = HeavenlyBody(name='Uranus', mass=86.813e24, pos=(-19.201*AU,0), vel=(0,6.8e3), color='brown') #haha
+    neptune = HeavenlyBody(name='Neptune', mass=102.413e24, pos=(-30.047*AU,0), vel=(0,5.43e3), color='aquamarine')
+    pluto = HeavenlyBody(name='Pluto', mass=0.01303e24, pos=(-39.482*AU,0), vel=(0,4.74e3), color='purple')
+
+    bodies = [sun, mercury, venus, earth, themoon] #, mars, jupiter, saturn, uranus, neptune, pluto]
+
+    #define integration limits
+    absTime = 0
     timestep = 60  # One day in seconds
     num_steps = int(1e5)
     print('Calculating orbital paths over a period of {} tellurian days...'.format(num_steps))
 
-   
-
-def dopri_function(timestep, bodyInfo):
-            vx += total_fx/mass*timestep
-            vy += total_fy/mass*timestep
-            px += vx*timestep
-            py += vy*timestep
-            
-            return px, py
-
-"""body.pxvector.append(body.px)
-body.pyvector.append(body.py)
-plt.show()"""
-
-
-def main():
-    sun = heavenly_body(name='Sun', mass=1.98892e30)
-    mercury = heavenly_body(name='Mercury', mass=0.3301e24, pos=(-.387*AU,0), vel=(0,47.36e3), color='black')
-    venus = heavenly_body(name='Venus', mass=4.8685e24, pos=(-.723*AU,0), vel=(0,35.02e3), color='orange')
-    earth = heavenly_body(name='Earth', mass=5.9742e24, pos=(-1*AU,0), vel=(0,29.783e3), color='blue')
-    themoon = heavenly_body(name='The Moon', mass=7.34767309e22, pos=(-1*AU-0.00257*AU,0), vel=(0,29.783e3+1.022e3), color='grey')
-    mars = heavenly_body(name='Mars', mass=.64171e24, pos=(-1.524*AU,0), vel=(0,24.07e3), color='red')
-    jupiter = heavenly_body(name='Jupiter', mass=1898.19e24, pos=(-5.204*AU,0), vel=(0,13.06e3), color='magenta')
-    saturn = heavenly_body(name='Saturn', mass=568.34e24, pos=(-9.582*AU,0), vel=(0,9.6e3), color='green')
-    uranus = heavenly_body(name='Uranus', mass=86.813e24, pos=(-19.201*AU,0), vel=(0,6.8e3), color='brown') #haha
-    neptune = heavenly_body(name='Neptune', mass=102.413e24, pos=(-30.047*AU,0), vel=(0,5.43e3), color='aquamarine')
-    pluto = heavenly_body(name='Pluto', mass=0.01303e24, pos=(-39.482*AU,0), vel=(0,4.74e3), color='purple')
-
-    bodies = [sun, mercury, venus, earth, themoon] #, mars, jupiter, saturn, uranus, neptune, pluto]
-    bodyInfo = [body.vx, body.vy, body.px, body.py, body.mass]
-    integrate_dat_bitch = ode(dopri_function).set_integrator('dopri5', method='adams')
-    integrate_dat_bitch.set_f_params(bodyInfo)
-    integrate_dat_bitch.set_initial_value()
     #calculate_positions(bodies)
     for step in xrange(num_steps): #columns
         #update graph every 1000 days
         for body in bodies:
-            # Add up all of the forces exerted on 'body'.
+            #initial parameter values
+            #values from the last iteration
             total_fx = total_fy = 0.0
+            integrationParams = [body.vx, body.vy, body.px, body.py, body.mass, total_fx, total_fy]
+
+            #set up dopri integration
+            integrator = ode(dopri_function).set_integrator('dopri5', method='adams')
+            integrator.set_f_params(integrationParams)
+            integrator.set_initial_value(integrationParams)
+
             for other in bodies:
                 # Don't calculate the body's attraction to itself
                 if body is other:
@@ -120,7 +114,9 @@ def main():
                 fx, fy = body.attraction(other)
                 total_fx += fx
                 total_fy += fy
-
+                posArray = integrator.integrate(integrator.t+timestep, timestep)
+                body.pxvector.append(posArray[0])
+                body.pyvector.append(posArray[1])
 
     """
     plt.plot(sun.pxvector, sun.pyvector, 'black')
@@ -138,3 +134,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
