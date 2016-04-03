@@ -53,7 +53,9 @@ class HeavenlyBody:
         theta = np.arctan2(dy, dx)
         fx = np.cos(theta) * f
         fy = np.sin(theta) * f
-        return fx, fy
+        
+        return np.array([fx, fy])
+
 
 def update_info(step, bodies):
     """(int, [Body])
@@ -84,7 +86,6 @@ def calculate_positions(bodies):
                 body.pxvector = [body.px]
                 body.pyvector = [body.py]
         #update_info(step, bodies)
-        force = {}
         for body in bodies:   #rows
             # Add up all of the forces exerted on 'body'.
             total_fx = total_fy = 0.0
@@ -92,9 +93,9 @@ def calculate_positions(bodies):
                 # Don't calculate the body's attraction to itself
                 if body is other:
                     continue
-                fx, fy = body.attraction(other)
-                total_fx += fx
-                total_fy += fy
+                f = body.attraction(other)
+                total_fx += f[0]
+                total_fy += f[1]
 
             body.vx += total_fx/body.mass*timeStep
             body.vy += total_fy/body.mass*timeStep

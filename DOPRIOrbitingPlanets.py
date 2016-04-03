@@ -40,6 +40,8 @@ class HeavenlyBody:
         self.pyvector = [self.py]
         self.color = color
 
+    def generate_x_params(self, other):
+        positionParams = [self.px, other.px, self.mass, other.mass, ]
 
     def attraction(self, other):
         # Report an error if the other object is the same as this one.
@@ -58,31 +60,16 @@ class HeavenlyBody:
         theta = np.arctan2(dy, dx)
         fx = np.cos(theta) * f
         fy = np.sin(theta) * f
-        return [fx, fy]
 
+        return np.array([fx, fy])
 
-def calculate_positions(bodies):
-    timeStep = 3600  # One hour in seconds
-    numSteps = int(1.1e3)
-    print('Calculating orbital paths over a period of {} tellurian hours...'.format(numSteps))
-    for body in bodies:   #rows
-        # Add up all of the forces exerted on 'body'.
-        total_fx = total_fy = 0.0
-        for other in bodies:
-            # Don't calculate the body's attraction to itself
-            if body is other:
-                continue
-            fx, fy = body.attraction(other)
-            total_fx += fx
-            total_fy += fy
+def x_function(t, px, fx, mass):
+    px += (fx/mass*t)*t
+    return px
 
-        body.vx += total_fx/body.mass*timeStep
-        body.vy += total_fy/body.mass*timeStep
-        body.px += body.vx*timeStep
-        body.py += body.vy*timeStep
-        body.pxvector.append(body.px)
-        body.pyvector.append(body.py)
-
+def y_function(t, py, fy, mass):
+    py += (fy/mass*t)*t
+    return py
 
 def main():
     sun = HeavenlyBody(name='Sun', mass=1.98892e30)
@@ -98,6 +85,42 @@ def main():
     pluto = HeavenlyBody(name='Pluto', mass=0.01303e24, px=-39.482*AU, vy=4.74e3, color='purple')
 
     bodies = [sun, mercury, venus, earth, moon]#, mars, jupiter, saturn, uranus, neptune, pluto]
+    t = 0
+    dt = 3600  # One hour in seconds
+    numSteps = int(1.1e3)
+    print('Calculating orbital paths over a period of {} tellurian hours...'.format(numSteps))
+    
+    for i in xrange(numSteps):
+        if (i>0) and (i%1000 == 0):
+            for body in bodies:
+                plt.plot(body.pxvector,body.pyvector, body.color)
+                body.pxvector = [body.px]
+                body.pyvector = [body.py]
+        for body in bodies:   #rows
+            # Add up all of the forces exerted on 'body'.
+            fx = fy = 0.0
+            dopri_x = ode(x_function).set_integrator('dopri5', method='adams')
+            dopri_x.set_f_params(body.px, fx, body.mass)
+            dopri_x.set_initial_value(body.px)
+
+            dopri_y = ode(y_function).set_integrator('dopri5', method='adams')
+            dopri_y.set_f_params(body.py, fy, body.mass)
+            dopri_y.set_initial_value(body.py)
+            for other in bodies:
+                # Don't calculate the body's attraction to itself
+                if body is other:
+                    continue
+                f = body.attraction(other)
+                fx += f[0]
+                fy += f[1]
+            px = dopri_x.integrate(dopri_x.t+dt, dt)
+            py = dopri_y.integrate(dopri_y.t+dt, dt)
+            print(dopri_x.successful())
+            print(dopri_y.successful())
+
+            body.pxvector.append(px)
+            body.pyvector.append(py)
+    plt.show()
 
 if __name__ == '__main__':
     main()
