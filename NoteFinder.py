@@ -45,38 +45,43 @@ def example_notes(t):
 	y = np.sin(freq2*2*np.pi*t)
 	return y
 
-
 notes = ['A', 'A#/Bb', 'B', 'C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab']
 
-samplerate = 44100.0
-recordLength = 1e4
-t = np.linspace(0, recordLength/samplerate, recordLength)
-y = example_notes(t)
+def main():
 
-yf = abs(np.fft.fft(y))/recordLength
-f = np.fft.fftfreq(yf.size, d=1/samplerate)
-np.fft.fftshift(f)
 
-max_amp = np.amax(yf)
-max_freq_index = np.argmax(yf)
-max_freq = f[max_freq_index]
-step, note, octave = note_finder(max_freq)
+	samplerate = 44100.0
+	recordLength = 1e4
+	t = np.linspace(0, recordLength/samplerate, recordLength)
+	y = example_notes(t)
 
-print('Strongest signal level: {}'.format(max_amp))
-print('Frequency of strongest signal: {}'.format(max_freq))
-print('Half steps from A4: {}'.format(step))
-print('Note name: {}\nOctaves from A4: {}'.format(note, octave))
+	yf = abs(np.fft.fft(y))/recordLength
+	f = np.fft.fftfreq(yf.size, d=1/samplerate)
+	np.fft.fftshift(f)
 
-"""
-!!!ignore this for now!!!
+	max_amp = np.amax(yf)
+	max_freq_index = np.argmax(yf)
+	max_freq = f[max_freq_index]
+	step, note, octave = note_finder(max_freq)
 
-filename = 'E:\\testsignal_1.wav'
-write_file = open(filename, 'w')
-#write_file.setparams((1,1,samplerate,0,'NONE','not compressed'))
-write_file.write(y.tostring())
-write_file.close()
-"""
+	print('Strongest signal level: {}'.format(max_amp))
+	print('Frequency of strongest signal: {}'.format(max_freq))
+	print('Half steps from A4: {}'.format(step))
+	print('Note name: {}\nOctaves from A4: {}'.format(note, octave))
 
-plt.plot(f,yf)
-plt.xlim([0,10e3])
-plt.show()
+	"""
+	!!!ignore this for now!!!
+
+	filename = 'E:\\testsignal_1.wav'
+	write_file = open(filename, 'w')
+	#write_file.setparams((1,1,samplerate,0,'NONE','not compressed'))
+	write_file.write(y.tostring())
+	write_file.close()
+	"""
+
+	plt.plot(f,yf)
+	plt.xlim([0,10e3])
+	plt.show()
+
+if __name__ == '__main__':
+	main()
