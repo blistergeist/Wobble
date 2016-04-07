@@ -64,12 +64,15 @@ class HeavenlyBody:
         return np.array([fx, fy])
 
 def x_function(t, px, fx, mass):
-    px += (fx/mass*t)*t
+    px = (fx/mass*t)*t
     return px
 
 def y_function(t, py, fy, mass):
-    py += (fy/mass*t)*t
+    py = (fy/mass*t)*t
     return py
+
+#def pos_function(t, px, py, fx, fy, mass):
+
 
 def main():
     sun = HeavenlyBody(name='Sun', mass=1.98892e30)
@@ -113,10 +116,13 @@ def main():
                 f = body.attraction(other)
                 fx += f[0]
                 fy += f[1]
+            #px = x_function(t, )
+
             px = dopri_x.integrate(dopri_x.t+dt, dt)
             py = dopri_y.integrate(dopri_y.t+dt, dt)
-            print(dopri_x.successful())
-            print(dopri_y.successful())
+            print(dopri_x.t)
+            #print(dopri_x.successful())
+            #print(dopri_y.successful())
 
             body.pxvector.append(px)
             body.pyvector.append(py)
