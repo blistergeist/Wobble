@@ -51,17 +51,9 @@ def update_info(step, bodies):
             body.name, body.px/AU, body.py/AU, body.vx, body.vy))
     print('\n')
 
-def draw_orbits():
-    plt.plot(sun.pxvector, sun.pyvector, 'black')
-    plt.plot(mercury.pxvector, mercury.pyvector, 'orange')
-    plt.plot(earth.pxvector, earth.pyvector, 'blue')
-    plt.plot(venus.pxvector, venus.pyvector, 'yellow')
-    plt.plot(mars.pxvector, mars.pyvector, 'red')
-    plt.plot(jupiter.pxvector, jupiter.pyvector, 'magenta')
-    plt.plot(saturn.pxvector, saturn.pyvector, 'green')
-    plt.plot(uranus.pxvector, uranus.pyvector, 'brown')#haha
-    plt.plot(neptune.pxvector, neptune.pyvector, 'aquamarine')
-    plt.plot(pluto.pxvector, pluto.pyvector, 'purple')
+def draw_orbits(bodies):
+    for body in bodies:
+        plt.plot(body.pxvector, body.pyvector, body.color);
     plt.show()
 
 def dopri_function(absTime, integrationParams):
@@ -70,9 +62,11 @@ def dopri_function(absTime, integrationParams):
             integrationParams[2] += integrationParams[0]*absTime
             integrationParams[3] += integrationParams[1]*absTime
             
-            return np.array([integrationParams[2], integrationParams[3]])
+            #return np.array([integrationParams[2], integrationParams[3]])   FORTRAN doesn't like this.
+            return integrationParams
 
 def main():
+
     sun = HeavenlyBody(name='Sun', mass=1.98892e30)
     mercury = HeavenlyBody(name='Mercury', mass=0.3301e24, pos=(-.387*AU,0), vel=(0,47.36e3), color='black')
     venus = HeavenlyBody(name='Venus', mass=4.8685e24, pos=(-.723*AU,0), vel=(0,35.02e3), color='orange')
@@ -90,11 +84,11 @@ def main():
     #define integration limits
     absTime = 0
     timestep = 60  # One day in seconds
-    num_steps = int(1e5)
+    num_steps = int(1e3)
     print('Calculating orbital paths over a period of {} tellurian days...'.format(num_steps))
 
     #calculate_positions(bodies)
-    for step in xrange(num_steps): #columns
+    for step in range(num_steps): #columns
         #update graph every 1000 days
         for body in bodies:
             #initial parameter values
@@ -115,22 +109,10 @@ def main():
                 total_fx += fx
                 total_fy += fy
                 posArray = integrator.integrate(integrator.t+timestep, timestep)
-                body.pxvector.append(posArray[0])
-                body.pyvector.append(posArray[1])
+                body.pxvector.append(posArray[2])
+                body.pyvector.append(posArray[3])
 
-    """
-    plt.plot(sun.pxvector, sun.pyvector, 'black')
-    plt.plot(mercury.pxvector, mercury.pyvector, 'orange')
-    plt.plot(earth.pxvector, earth.pyvector, 'blue')
-    plt.plot(venus.pxvector, venus.pyvector, 'yellow')
-    plt.plot(mars.pxvector, mars.pyvector, 'red')
-    plt.plot(jupiter.pxvector, jupiter.pyvector, 'magenta')
-    plt.plot(saturn.pxvector, saturn.pyvector, 'green')
-    plt.plot(uranus.pxvector, uranus.pyvector, 'brown')#haha
-    plt.plot(neptune.pxvector, neptune.pyvector, 'aquamarine')
-    plt.plot(pluto.pxvector, pluto.pyvector, 'purple')
-    plt.show()
-    """
+    draw_orbits(bodies);
 
 if __name__ == '__main__':
     main()
