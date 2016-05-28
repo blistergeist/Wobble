@@ -26,7 +26,7 @@ def eulerMethod():
 	xInitialAcc = 0.0 #m/s
 	yInitialAcc = gravity
 
-	timeRes = 100
+	timeRes = 10000
 	timeArray = np.linspace(0,5,timeRes)
 
 	yPosE = np.zeros(timeRes)
@@ -41,12 +41,12 @@ def eulerMethod():
 		else:
 			yPosE[i] = yInitialPos + yInitialVel*timeArray[i] + 0.5*yInitialAcc*timeArray[i]**2
 	end = time.clock()
-	elapsed = end-start
+	elapsed = time.clock()-start
 	print('Elapsed time for Euler: {} seconds'.format(elapsed))
 
 	return xPosE, yPosE
 
-def calcPos(t, currentPos):
+def calcPos(t, currentPos, dt):
 	gravity = -9.81 #m/s^2
 	xLastPos = currentPos[0] #m
 	yLastPos = currentPos[1] #m
@@ -55,34 +55,35 @@ def calcPos(t, currentPos):
 	xInitialAcc = 0.0 #m/s
 	yInitialAcc = gravity
 	
-	xPos = 0 + xInitialVel*t + 0.5*xInitialAcc*t**2
-	if t > .001 and yLastPos <= 0:
+	xPos = xInitialVel + xInitialAcc*t
+	if t > dt and yLastPos <= 0:
 		yPos = 0
 	else:
-		yPos = 0 + yInitialVel*t + 0.5*yInitialAcc*t**2
+		yPos = yInitialVel + yInitialAcc*t
 
 	return np.array([xPos, yPos])
 
 def dopriMethod():
 	"""################ DOPRI5 METHOD ################"""
-	#define function to integrate
-	#t is current time, y is current variable values
-	t0 = 0.0
-	t1 = 5.0
-	dt = 0.1
-	y0 = [0.0,0.0]
-	xPosD = []
+	t0 = 0.0			#start time
+	t1 = 5.0			#end time
+	dt = 0.01			#time step
+	xy0 = [0.0, 0.0]	#initial x and y positions
+	#have to do this because of the explicit non-tuple requirement
+	xPosD = []			
 	yPosD = []
 	posD = []
 
 	dopriPos = ode(calcPos).set_integrator('dopri5', method='adams')
-	dopriPos.set_initial_value(y0, t0)
+	dopriPos.set_f_params(dt)	#this is just a function to add arguments beyond the first array (xy0)
+	dopriPos.set_initial_value(xy0, t0)	#this is obviously setting initial values
+	start = time.clock()
 	while dopriPos.t < t1:
 		posD = dopriPos.integrate(dopriPos.t+dt, dt)
-		#print('DOPRI5 Time: {}'.format(dopriPos.t))
-		#print('DOPRI5 Positions: x => {} y => {}'.format(posD[0], posD[1]))
 		xPosD.append(posD[0])
 		yPosD.append(posD[1])
+	elapsed = time.clock()-start
+	print('Elapsed time for DOPRI5: {} seconds'.format(elapsed))
 
 	return xPosD, yPosD
 
@@ -94,8 +95,14 @@ def main():
 	plt.figure(1)
 	plt.subplot(121, axisbg='k')
 	eulerAxes, = plt.plot(xPosE,yPosE, 'y')
+	plt.title('Euler Method')
+	plt.ylabel('Y Position (m)')
+	plt.xlabel('X Position (m)')
 	plt.subplot(122)
 	dopriAxes, = plt.plot(xPosD, yPosD)
+	plt.title('DOPRI5 Method')
+	plt.ylabel('Y Position (m)')
+	plt.xlabel('X Position (m)')
 	plt.show()
 
 if __name__ == '__main__':
