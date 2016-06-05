@@ -73,7 +73,7 @@ def calculate_positions(bodies):
     positions of all the provided bodies.
     """
     timeStep = 3600  # One hour in seconds
-    numSteps = int(1e5)
+    numSteps = int(1e4)
     print('Calculating orbital paths over a period of {} tellurian hours...'.format(numSteps))
 
     for step in xrange(numSteps): #columns

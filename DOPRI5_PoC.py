@@ -26,7 +26,7 @@ def eulerMethod():
 	xInitialAcc = 0.0 #m/s
 	yInitialAcc = gravity
 
-	timeRes = 10000
+	timeRes = 100000
 	timeArray = np.linspace(0,5,timeRes)
 
 	yPosE = np.zeros(timeRes)
@@ -50,7 +50,7 @@ def calcPos(t, currentPos, dt):
 	gravity = -9.81 #m/s^2
 	xLastPos = currentPos[0] #m
 	yLastPos = currentPos[1] #m
-	xInitialVel = 1.0 #m/s
+	xInitialVel = 10.0 #m/s
 	yInitialVel = 10.0 #m/s
 	xInitialAcc = 0.0 #m/s
 	yInitialAcc = gravity
@@ -67,7 +67,7 @@ def dopriMethod():
 	"""################ DOPRI5 METHOD ################"""
 	t0 = 0.0			#start time
 	t1 = 5.0			#end time
-	dt = 0.01			#time step
+	dt = 0.05			#time step
 	xy0 = [0.0, 0.0]	#initial x and y positions
 	#have to do this because of the explicit non-tuple requirement
 	xPosD = []			
@@ -90,6 +90,8 @@ def dopriMethod():
 def main():
 	xPosE, yPosE = eulerMethod()
 	xPosD, yPosD = dopriMethod()
+	print(len(xPosE))
+	print(len(xPosD))
 
 	"""################ PLOT ################"""
 	plt.figure(1)
@@ -105,5 +107,6 @@ def main():
 	plt.xlabel('X Position (m)')
 	plt.show()
 
+	
 if __name__ == '__main__':
 	main()
